@@ -41,6 +41,17 @@ type PackFace = PrisonFace
  * релиза (promo.lobby).
  */
 export function Recommend({ on }: { on: boolean }) {
+  // Fork: реклама убрана. Карусель справа в лобби (Discord, Telegram, анархия,
+  // Аркания, PrisonRPG, сервер тиров, «PLUS за друга») больше не рисуется.
+  // Ранний выход стоит до хуков, поэтому ни один запрос за промо не уходит.
+  // Вернуть: удалить эту строку.
+  if (!ADS_ENABLED) return null
+  return <RecommendCarousel on={on} />
+}
+
+const ADS_ENABLED = false
+
+function RecommendCarousel({ on }: { on: boolean }) {
   const t = useT()
   const shown = usePromo((s) => s.promo.lobby === ANARCHY.mode)
   const partners = useMarketOffers('partners')

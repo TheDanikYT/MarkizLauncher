@@ -85,6 +85,9 @@ export function HubTile({ kind, className, daily }: { kind: HubTileKind; classNa
   const [servers, setServers] = useState(0)
   useEffect(() => {
     if (kind !== 'server' || !hasMillidaAccount()) return
+    // Без сессии Millida запрос вернёт 401, и это событие «сессия истекла»
+    // выкинет оффлайн-игрока на экран входа. Проверка выше уже отсекает
+    // такой случай — здесь только напоминание, почему она обязательна.
     let alive = true
     api<unknown>('/hosting/servers/me')
       .then((l) => alive && setServers(Array.isArray(l) ? l.length : 0))

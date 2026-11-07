@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Icon } from '../components/Icon'
-import { tx, useMarketOffers, useT } from '../i18n'
-import { BuildIcon } from '../components/playhub/BuildIcon'
+import { tx, useT } from '../i18n'
 import { Installs } from '../components/Installs'
 import { RunningGames } from '../components/lobby/RunningGames'
 import { LobbyCharacter } from '../components/lobby/LobbyCharacter'
@@ -12,27 +11,23 @@ import { isLeader, leaveParty, loadParty, partyWithOthers, usePartyStore } from 
 import { stopMateSearch, useMateSearch } from '../state/mateSearch'
 import { partyPlayPressed } from '../lib/partyPlay'
 import { Recommend } from '../components/lobby/Recommend'
-import { AnarchyArt } from '../components/playhub/AnarchyTile'
-import { targetsAnarchy } from '../lib/ownServer'
 import { PixelField } from '../components/lobby/PixelField'
 import { LobbyAmbience } from '../components/lobby/LobbyAmbience'
 import { HubTile } from '../components/lobby/HubTile'
+import { QuickBuilds } from '../components/lobby/QuickBuilds'
+import { useHasMillida } from '../state/auth'
 import { useHeroWallpaper } from '../components/HeroWallpaper'
-import { LOADER_NAME, fmtN, fmtPlaytime } from '../lib/format'
 import { VIDEOS } from '../lib/wallpaper'
 import { hasTauri } from '../ipc/tauri'
 import { useProfiles } from '../state/profiles'
 import { useLobby } from '../state/lobbyMode'
 import type { LobbyMode } from '../state/lobbyMode'
 import { playMode } from '../lib/lobbyPlay'
-import { usePackUpdateHint } from '../lib/packUpdateHint'
-import { usePremiumBuild } from '../lib/premiumBuild'
 import { useWallpaper } from '../state/wallpaper'
 import { convertFileSrc, pickWallpaper } from '../ipc/commands'
 import { setScreen, showToast, useUi } from '../state/ui'
 import { cancelPrelaunch } from '../lib/launch'
 import { playButtonState } from '../lib/launchView'
-import { renderLive } from '../lib/renderGate'
 import { playHoursLabel, playTier } from '../lib/playTiers'
 import { isDayZero } from '../lib/retention'
 import { LobbyChips } from '../components/lobby/LobbyChips'
@@ -41,8 +36,6 @@ import { RecentPlayButton } from '../components/lobby/RecentPlayButton'
 import { DailyPassModal } from '../components/daily/DailyPassModal'
 import { useDailyModalHost } from '../components/daily/DailyChest'
 import { useDaily } from '../state/daily'
-import { usePromo } from '../state/promo'
-import { ANARCHY, anarchyMode } from '../lib/ownServer'
 import { useFirstHourChest } from '../lib/firstHourChest'
 import { useModUpdates } from '../state/modUpdates'
 import { usePlayStats } from '../state/playStats'
@@ -65,31 +58,10 @@ import { TIERS_SECTION_PUBLIC } from '../lib/tiersSection'
  * Пустая плашка режима: вместо значка-сетки по очереди сменяются обложки —
  * версии, сборки, режимы, как барабан (правка владельца 23.09.2026, 21:45).
  */
-const REEL = [
-  '/versions/26.3.webp',
-  '/versions/1.20.1.webp',
-  '/versions/1.21.11.webp',
-  '/versions/26.2.webp',
-  '/versions/1.21.4.webp',
-  '/versions/1.16.5.webp',
-  '/versions/1.12.2.webp',
-]
-function ModeReel() {
-  const [i, setI] = useState(0)
-  useEffect(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    // Игра поверх — картинки не листаются: каждая смена декодирует новую.
-    const t = setInterval(() => renderLive() && setI((n) => (n + 1) % REEL.length), 2600)
-    return () => clearInterval(t)
-  }, [])
-  return <img key={i} className="lobby-mode-reel" src={REEL[i]} alt="" />
-}
-
 export function Play({ on }: { on: boolean }) {
   const t = useT()
   const profiles = useProfiles((s) => s.profiles)
   const picked = useLobby((s) => s.picked)
-  const lobbyServers = useLobby((s) => s.servers)
   const loadLobby = useLobby((s) => s.load)
   const wp = useWallpaper()
   // Обои убраны (владелец 23.09.2026): фон — только цветная сцена PixelField.
@@ -99,8 +71,8 @@ export function Play({ on }: { on: boolean }) {
   const statsLoaded = usePlayStats((s) => s.loaded)
   const passOpen = useDaily((s) => s.modal)
   const modalHost = useDailyModalHost()
-  const anarchyLobby = usePromo((s) => s.promo.lobby === ANARCHY.mode)
-  const anarchyPromo = useMarketOffers('partners') && anarchyLobby
+  const hasAccount = useHasMillida()
+
   const running = useGame((s) => s.list)
   const gameStopping = useGame((s) => s.stopping)
   // Ход подготовки к запуску — прямо на кнопке: скачиваем → запускаем → в игре.
@@ -115,8 +87,6 @@ export function Play({ on }: { on: boolean }) {
   // баннер, плитки и сундук уходят, на их месте состав, голос и чат.
   const social = inParty || searching || !!party?.room?.open
   // Пати договорилась о другом, чем стоит у меня: плашка показывает общий выбор.
-  const partyGoes = (inParty || party?.room?.open) && party?.target ? party.target.title : null
-  const hoursOf = (name: string) => playStats.builds.find((b) => b.key === name) || null
 
   useEffect(() => {
     if (on && profiles.length && profiles.length !== updates.scannedCount && !updates.scanning)
@@ -161,16 +131,13 @@ export function Play({ on }: { on: boolean }) {
   const dayZero = isDayZero({ ...playStats, loaded: statsLoaded }, running.length > 0 || prelaunch.open)
   const chosen: LobbyMode | null =
     picked && (picked.kind !== 'build' || profiles.some((p) => p.name === picked.name)) ? picked : null
+  // Fork: реклама убрана — анархия больше не подставляется первым режимом
+  // новичку вместо выбора. Остаётся свежая ваниль, как было до промо.
   const mode: LobbyMode | null =
-    chosen ?? (dayZero ? (anarchyPromo ? anarchyMode() : { kind: 'version', version: '1.21.11' }) : null)
+    chosen ?? (dayZero ? { kind: 'version', version: '1.21.11' } : null)
   useFirstHourChest(on, playStats.total_seconds)
   const sel = mode && mode.kind === 'build' ? profiles.find((p) => p.name === mode.name) || null : null
-  const packUpdate = usePackUpdateHint(mode, profiles, on)
-  const premiumBuild = usePremiumBuild(sel ? sel.name : null, on)
-  const cardKind = mode ? (premiumBuild ? 'premium' : mode.kind) : null
   const btn = playButtonState({ modeKind: mode ? mode.kind : null, selected: sel ? sel.name : null, running, prelaunch })
-  const selHours = sel ? hoursOf(sel.name) : null
-  const liveServer = mode && mode.kind === 'server' ? lobbyServers.find((s) => s.slug === mode.slug) || null : null
 
   // Для аналитики: что стоит в «Сегодня играем» (имя своей сборки — только как id сборки).
   const modeId =
@@ -184,63 +151,8 @@ export function Play({ on }: { on: boolean }) {
             ? mode.slug
             : undefined
 
-  const modeArt =
-    mode?.kind === 'build' && premiumBuild ? (
-      premiumBuild.cover ? <img src={premiumBuild.cover} alt="" /> : null
-    ) : mode?.kind === 'build' ? (
-      // Иконка сборки крупно по центру — как на карточке «Моих сборок»
-      // (владелец 24.09.2026: мелкий сундук в углу).
-      <span className="lobby-mode-cover lobby-mode-bi">
-        <BuildIcon icon={sel?.icon} name={sel?.name || mode.name} size={104} />
-      </span>
-    ) : mode?.kind === 'version' ? (
-      <img src={'/versions/' + mode.version + '.webp'} alt="" onError={(e) => (e.currentTarget.style.display = 'none')} />
-    ) : mode?.kind === 'premium' ? (
-      mode.cover ? <img src={mode.cover} alt="" /> : null
-    ) : mode?.kind === 'server' ? (
-      targetsAnarchy(mode) ? (
-        <AnarchyArt />
-      ) : mode.banner || mode.logo ? <img src={(mode.banner || mode.logo) as string} alt="" /> : null
-    ) : (
-      <ModeReel />
-    )
   const modeTitle =
     mode?.kind === 'build' ? mode.name : mode?.kind === 'version' ? 'Minecraft ' + mode.version : mode?.kind === 'premium' ? mode.title : mode?.kind === 'server' ? mode.name : t('Ещё не выбрано')
-  const partyOther = !!partyGoes && partyGoes !== modeTitle
-  const modeMeta =
-    mode?.kind === 'build' && sel ? (
-      <>
-        {LOADER_NAME(sel) + ' · ' + sel.version}
-        {/* «меньше минуты» не пишем — это пустяк, а не наигранные часы */}
-        {selHours && selHours.seconds >= 3600 ? (
-          <span className="hero-num">
-            <Icon id="i-clock" />
-            <b>{fmtPlaytime(selHours.seconds)}</b>
-          </span>
-        ) : null}
-      </>
-    ) : mode?.kind === 'version' ? (
-      'Fabric'
-    ) : mode?.kind === 'premium' ? (
-      mode.meta
-    ) : mode?.kind === 'server' && liveServer ? (
-      <span className="hero-num">
-        <Icon id="i-users" />
-        <b>{fmtN(liveServer.online)}</b>
-      </span>
-    ) : null
-  const modeTag =
-    mode?.kind === 'premium' || premiumBuild ? (
-      <>
-        <Icon id="i-crown" />
-        {t('Премиум')}
-      </>
-    ) : mode?.kind === 'server' ? (
-      <>
-        <Icon id="i-server" />
-        {t('Сервер')}
-      </>
-    ) : null
 
   return (
     <section className={'screen lobby' + (social ? ' lobby-social' : '') + (on ? ' on' : '')} id="s-play">
@@ -267,11 +179,14 @@ export function Play({ on }: { on: boolean }) {
           бонуса нет, у «Магазина» «!», пока бонус не забран. */}
       {/* Плитки остаются и в пати (владелец 12.10.2026: «не убирай элементы, вместо баннера — виджет пати»). */}
       <div className="lobby-left">
+        {/* Оффлайн-игрок (ник или лицензия без входа в Millida) не видит
+            витрину: магазин, тиры и хостинг живут на сервере и без сессии
+            отвечают 401. «Мой скин» остаётся — он работает локально. */}
         <nav className="lobby-nav" aria-label={t('Разделы')}>
-          <HubTile kind="shop" />
-          {TIERS_SECTION_PUBLIC ? <HubTile kind="pvp" /> : null}
+          {hasAccount ? <HubTile kind="shop" /> : null}
+          {hasAccount && TIERS_SECTION_PUBLIC ? <HubTile kind="pvp" /> : null}
           <HubTile kind="wardrobe" />
-          <HubTile kind="server" />
+          {hasAccount ? <HubTile kind="server" /> : null}
         </nav>
       </div>
       {/* Кнопки пати стоят над «Играть» всегда: «Найти пати» на том же месте становится «Отменой». */}
@@ -291,48 +206,12 @@ export function Play({ on }: { on: boolean }) {
           <span className="lobby-tools" />
         </div>
         <div className="lobby-row">
-          {/* OneBlock в лобби убран (владелец 24.09.2026, 07:26: «пока убираем»). */}
-          {/* Плашка ведёт в каталог режимов, «Играть» — только запуск. */}
-          <button
-            className="lobby-mode"
-            data-sound="open"
-            data-track="today"
-            data-section="today"
-            data-src="today"
-            data-kind={mode?.kind}
-            data-id={modeId}
-            data-private={mode?.kind === 'build' ? '' : undefined}
-            onClick={() => setScreen('playhub')}
-          >
-            {/* Панель на всю ширину (правка владельца 22:44): крупная обложка
-                меняется раз в пару секунд — «загляни, может найдёшь интереснее». */}
-            <span className={'lobby-mode-card' + (cardKind ? ' kind-' + cardKind : ' empty')}>
-              <span className="lobby-mode-art">
-                {mode && !partyOther ? modeArt : null}
-                <span className={'lobby-mode-reelbox' + (mode && !partyOther ? ' under' : '')}>
-                  <ModeReel />
-                </span>
-                {modeTag && !partyOther ? <span className="mode-tile-tag">{modeTag}</span> : null}
-              </span>
-              <span className="lobby-mode-body">
-                <span className="lobby-mode-lab">{partyGoes ? t('Пати идёт') : dayZero && !chosen ? t('Начни отсюда') : t('Сегодня играем')}</span>
-                <b>{partyGoes || modeTitle}</b>
-                {modeMeta && !partyOther ? <span className="meta">{modeMeta}</span> : null}
-                <span className="lobby-mode-change">
-                  {t('Сменить сборку')}
-                  <Icon id="i-chev-r" />
-                </span>
-                {packUpdate ? (
-                  <span className="meta" id="lobbyPackUpdate">
-                    <span className="hero-num">
-                      <Icon id="i-download" />
-                      {t('Доступно обновление сборки')}
-                    </span>
-                  </span>
-                ) : null}
-              </span>
-            </span>
-          </button>
+          {/* Быстрый выбор сборки вместо карточки «Сегодня играем · сервер»
+              (правка: раньше смена сборки требовала ухода в каталог).
+              Нажатие выбирает сборку, «Играть» справа запускает её. */}
+          <div className="lobby-mode-qb">
+            <QuickBuilds />
+          </div>
           {/* Кнопка запуска стоит на постоянном месте и видна на первом кадре:
               наведение её не вызывает и не прячет (антипаттерн Modrinth). */}
           <div className="play-col">

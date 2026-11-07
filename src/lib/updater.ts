@@ -54,7 +54,8 @@ function updateFailed(where: string, e: unknown) {
   trackFailure('updater', e, { step: where })
 }
 
-const updatesAllowed = () => hasTauri() && !import.meta.env.DEV
+// Fork: официальный канал обновлений отключён.
+const updatesAllowed = () => false
 
 /// Flatpak updates itself and mounts /app read-only, so the fallback channel cannot install there.
 let managedOutside: boolean | null = null

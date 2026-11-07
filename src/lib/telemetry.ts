@@ -139,12 +139,10 @@ function uuid(): string {
   return 'i' + Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
+// Fork: usage statistics are removed. Every send path (event queue, heartbeat,
+// error reports, realtime install id) checks this one function first.
 export function telemetryEnabled(): boolean {
-  try {
-    return localStorage.getItem(OPT_OUT_KEY) !== '1'
-  } catch {
-    return true
-  }
+  return false
 }
 
 /** Мод в игре читает выключатель из файла, который пишет лаунчер: держим их вместе. */

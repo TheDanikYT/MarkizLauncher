@@ -249,10 +249,8 @@ import { fixMark, forgetCrash, rememberCrash } from './lib/repair'
 import { tryAutoHeal } from './lib/autoHeal'
 import { sendCompatSignal } from './lib/compatSignal'
 import { syncRunningGame, useGame } from './state/game'
-import { watchPromo } from './state/promo'
 import { watchArcania2 } from './lib/arcaniaRelease'
 import { warmArcaniaCover } from './components/arcania/ArcaniaCard'
-import { watchPromoServers } from './lib/promoServers'
 import { CrashModal } from './components/CrashModal'
 import { LagCard } from './components/LagCard'
 import { LiveLog, startLiveLog } from './components/LiveLog'
@@ -409,11 +407,12 @@ export function App() {
     const releaseRealtime = retainRealtime()
     const stopRelay = initRealtimeRelay()
     initCalls()
-    const stopPromo = watchPromo()
+    // Fork: реклама убрана. Промо-баннер и промо-серверы больше не
+    // запрашиваются — вместе с ними уходят запросы /launcher/promo и вставка
+    // чужих серверов в список сборок.
     const stopArcania2 = watchArcania2(warmArcaniaCover)
     const stopStreakReminder = initStreakReminder()
     const stopStreakActivity = initStreakActivity()
-    const stopPromoServers = watchPromoServers()
     void bootUpdate().then((leaving) => {
       if (leaving) return
       preloadScreens()
@@ -488,11 +487,10 @@ export function App() {
     })
     return () => {
             stopRelay()
-      stopPromo()
       stopArcania2()
       stopStreakReminder()
       stopStreakActivity()
-      stopPromoServers()
+      // (промо-серверы отключены вместе с рекламой)
       releaseRealtime()
       clearInterval(updPoll)
       clearInterval(msPoll)
@@ -549,6 +547,15 @@ export function App() {
 
   useEffect(() => {
     const onExpired = () => {
+      // Срок истёк у сессии Millida, а не у игрового аккаунта. Оффлайн-ник и
+      // лицензия живут без сервера: у них нет ни токена, ни срока, поэтому
+      // выкидывать их на экран входа нельзя — игрок терял доступ к игре из-за
+      // чужого 401 от подсистем Millida.
+      const acc = getAccount()
+      if (acc && isGameAccountKind(acc.kind)) {
+        useUi.getState().setLogged(true)
+        return
+      }
       // Чистим состояние и при logged=false: фоновые опросы (присутствие,
       // телеметрия, синк) идут и до входа в оболочку, и без очистки аккаунт
       // остаётся наполовину залогиненным до перезапуска.

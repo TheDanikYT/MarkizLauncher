@@ -51,7 +51,9 @@ const T = await import('./telemetry')
 const tick = () => new Promise((r) => setTimeout(r, 0))
 const types = (b: Batch) => b.events.map((e) => e.type)
 
-describe('очередь телеметрии', () => {
+// Fork: telemetry is removed (telemetryEnabled() is always false), so the queue
+// behaviour below cannot run. Restore describe() to bring these tests back.
+describe.skip('очередь телеметрии', () => {
   beforeEach(() => {
     T.__resetTelemetryForTests()
     store.clear()

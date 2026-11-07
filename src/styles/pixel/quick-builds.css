@@ -1,0 +1,188 @@
+/* Быстрый выбор сборки в лобби: вместо карточки «Сегодня играем · сервер».
+   Строка прокручивается по горизонтали, выбранная сборка подсвечена. */
+/* Слот в строке лобби: занимает всё место слева от «Играть», как раньше
+   карточка режима, и той же высоты — иначе кнопка «поедет» по вертикали. */
+.lobby-row .lobby-mode-qb {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.qb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+.qb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-inline: 2px;
+}
+.qb-lab {
+  font: 700 11px/1 var(--m-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--m-fg-subtle);
+}
+.qb-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font: 650 12px/1 var(--m-font);
+  color: var(--m-fg-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.qb-all svg.icon {
+  width: 13px;
+  height: 13px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .qb-all:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--m-fg);
+  }
+}
+
+.qb-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.qb-row::-webkit-scrollbar {
+  height: 6px;
+}
+.qb-row::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+}
+
+.qb-item {
+  position: relative;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 178px;
+  max-width: 232px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: rgba(0, 0, 0, 0.32);
+  cursor: pointer;
+  text-align: left;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .qb-item:hover {
+    background: rgba(0, 0, 0, 0.46);
+    transform: translateY(-1px);
+  }
+}
+.qb-item.on {
+  border-color: var(--m-accent, #6bd968);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.qb-cover {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.07);
+}
+.qb-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.qb-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.qb-meta b {
+  font: 700 13px/1.2 var(--m-font);
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qb-meta span {
+  font: 500 11px/1.2 var(--m-font);
+  color: var(--m-fg-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qb-tick {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--m-accent, #6bd968);
+}
+.qb-tick svg.icon {
+  width: 12px;
+  height: 12px;
+  color: #08200a;
+}
+
+.qb-empty {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  text-align: left;
+}
+.qb-empty svg.icon {
+  width: 24px;
+  height: 24px;
+  color: var(--m-fg-muted);
+}
+.qb-empty > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.qb-empty b {
+  font: 700 13px/1.2 var(--m-font);
+  color: #fff;
+}
+.qb-empty span span {
+  font: 500 11px/1.2 var(--m-font);
+  color: var(--m-fg-subtle);
+}
+@media (hover: hover) and (pointer: fine) {
+  .qb-empty:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}

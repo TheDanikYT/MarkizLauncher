@@ -182,8 +182,6 @@ pub fn run() {
         }))
         .plugin(navguard::init())
         .plugin(tauri_plugin_deep_link::init())
-        // Tauri auto-update plugin. The address and the public signing key are in tauri.conf.json. Our own signature check code is in engine/core/selfupdate.rs.
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         // Only one global hotkey is registered: the overlay hotkey (Alt+M by default), see overlay.rs.
@@ -610,9 +608,6 @@ mod tests {
         "core:window:allow-close",
         "core:window:allow-destroy",
         "core:window:allow-start-dragging",
-        "updater:allow-check",
-        "updater:allow-download",
-        "updater:allow-install",
         "deep-link:allow-get-current",
         "clipboard-manager:allow-write-text",
         "process:allow-restart",

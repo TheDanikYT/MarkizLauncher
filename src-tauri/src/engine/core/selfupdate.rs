@@ -17,7 +17,7 @@ use super::paths::open_path;
 // tauri.conf.json, so the fallback is not a hole through which a compromised CDN
 // could run an arbitrary installer.
 // Fallback address of the version list. It returns json with the version, the file link and the signature. The main path goes through the Tauri updater plugin.
-const FALLBACK_ENDPOINTS: &[&str] = &["https://launcher-storage.millida.net/latest.json"];
+const FALLBACK_ENDPOINTS: &[&str] = &[];
 
 // Testing channel. The player opts in from settings and then sees a release
 // before everyone else, so a heavy change lands on a few hundred machines

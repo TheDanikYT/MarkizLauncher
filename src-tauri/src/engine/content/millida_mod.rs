@@ -557,7 +557,8 @@ fn telemetry_off_file() -> PathBuf {
 }
 
 pub fn game_telemetry_enabled() -> bool {
-    enabled_at(&telemetry_off_file())
+    // Fork: game telemetry is always off; MILLIDA_TELEMETRY=0 is passed to the game.
+    false
 }
 
 pub fn set_game_telemetry_enabled(on: bool) -> Result<(), String> {
