@@ -144,3 +144,4 @@ A fork needs its own name, its own icons and its own app registration in Azure (
 Copyright and DMCA takedown notices: [dmca@millida.net](mailto:dmca@millida.net). What a notice must contain: [DMCA.md](DMCA.md).
 
 <sub>Millida Launcher is not affiliated with Mojang AB or Microsoft. Minecraft is a trademark of Mojang AB.</sub>
+# MarkizLauncher
