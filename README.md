@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/TheDanikYT/MarkizLauncher/releases/download/1.0/markiz-launcher-windows.exe"><img src=".github/readme/download-windows-en.png" width="32%" alt="Download for Windows"></a>
-  <a href="https://millida.net/launcher/dl/linux"><img src=".github/readme/download-linux-en.png" width="32%" alt="Download for Linux"></a>
+  <a href="https://github.com/TheDanikYT/MarkizLauncher/releases/download/1.0/markiz-launcher-linux"><img src=".github/readme/download-linux-en.png" width="32%" alt="Download for Linux"></a>
 </p>
 
 <p align="center">
