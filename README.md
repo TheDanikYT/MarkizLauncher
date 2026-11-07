@@ -15,11 +15,7 @@
 
 <p align="center">
   <a href="https://millida.net/launcher/antivirus"><img src=".github/readme/trust-virus-en.png" width="49%" alt="No viruses: every installer is checked by VirusTotal"></a>
-  <img src=".github/readme/trust-account-en.png" width="49%" alt="Your account is safe: you enter your password only on the Microsoft site">
-  <img src=".github/readme/trust-signed-en.png" width="49%" alt="The installer from the site is signed with a GlobalSign EV certificate">
+  <img src=".github/readme/trust-account-ru.png" width="49%" alt="Your account is safe: you enter your password only on the Microsoft site">
+  <img src=".github/readme/trust-signed-ru.png" width="49%" alt="The installer from the site is signed with a GlobalSign EV certificate">
   <a href="ARCHITECTURE.md"><img src=".github/readme/trust-open-en.png" width="49%" alt="Open source: you can check any line right here"></a>
-</p>
-
-<p align="center">
-  <img src="screenshots/lobby.png" alt="Launcher lobby">
 </p>
