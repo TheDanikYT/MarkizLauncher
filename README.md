@@ -23,10 +23,3 @@
 <p align="center">
   <img src="screenshots/lobby.png" alt="Launcher lobby">
 </p>
-
-| Instances | Catalog |
-| :---: | :---: |
-| <img src="screenshots/library.png" alt="My instances"> | <img src="screenshots/catalog.png" alt="Catalog of Modrinth and CurseForge mods and modpacks"> |
-| **Wardrobe** | **Your own server** |
-| <img src="screenshots/wardrobe.png" alt="Skins, capes and cosmetics"> | <img src="screenshots/server.png" alt="Control panel of your own server"> |
-
