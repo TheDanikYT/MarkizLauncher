@@ -4,7 +4,6 @@
 
 <p align="center">
   <a href="https://millida.net/launcher/dl/windows"><img src=".github/readme/download-windows-en.png" width="32%" alt="Download for Windows"></a>
-  <a href="https://millida.net/launcher/dl/macos"><img src=".github/readme/download-macos-en.png" width="32%" alt="Download for macOS"></a>
   <a href="https://millida.net/launcher/dl/linux"><img src=".github/readme/download-linux-en.png" width="32%" alt="Download for Linux"></a>
 </p>
 
